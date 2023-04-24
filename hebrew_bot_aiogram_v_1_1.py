@@ -101,11 +101,13 @@ async def get_row_by_id(table_name, id):
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
-    await bot.send_message(message.from_user.id, "Choose your language / Оберіть мову / Выберите язык", reply_markup=lang_kb)
+    await bot.send_message(message.from_user.id, "Оберіть мову / Choose your language /Выберите язык", reply_markup=lang_kb)
 
 @dp.message_handler(commands=['level'])
 async def process_start_command(message: types.Message):
     lang = await get_user_language(message.from_user.id)
+    if lang == None:
+        lang = 'en'
     key = 'info_'+lang
     txt=multilang[key]
     await bot.send_message(message.from_user.id, txt, reply_markup=level_kb)
@@ -246,7 +248,7 @@ async def level_choice(callback_query: types.CallbackQuery):
 
 @dp.message_handler()
 async def handle_all_messages(message: types.Message):
-    txt = 'Press /start. Звиняйте, я коммуницирую тока через кнопки. Или жмите кнопку или введите /start'
+    txt = 'Press /start'
     await bot.send_message(message.from_user.id, txt)
 
 if __name__ == '__main__':
