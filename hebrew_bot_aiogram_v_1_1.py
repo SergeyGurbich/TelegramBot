@@ -1,5 +1,6 @@
 '''В этой версии вместо запросов по API добавлена собственная база данных, 
-включающая текстовые, аудиозадания и задания-картинки, плюс добавлен английский язык'''
+включающая текстовые, аудиозадания и задания-картинки, плюс добавлен английский язык,
+плюс включен логгинг - сохранение логов в отдельный файл'''
 
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
@@ -9,6 +10,7 @@ from aiogram.utils import executor
 #import requests
 import sqlite3
 import random
+import logging
 from aiogram.types import InputFile
 from config import TOKEN
 
@@ -17,6 +19,13 @@ bot = Bot(token=TOKEN)
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+    filename='bot.log', # указываем имя файла для записи логов
+    filemode='a' # режим записи логов: 'a' - добавлять новые записи в конец файла
+)
 
 multilang = {'info_ru': 'Выберите уровень. Позже вы сможете его изменить, набрав команду /level',
               'info_uk':'Оберіть рівень. Пізніше ви зможете змінити свій вибір, набравши команду /level',
@@ -101,6 +110,7 @@ async def get_row_by_id(table_name, id):
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
+    logging.info(f"Пользователь {message.from_user.username} запустил бот")
     await bot.send_message(message.from_user.id, "Оберіть мову / Choose your language /Выберите язык", reply_markup=lang_kb)
 
 @dp.message_handler(commands=['level'])
