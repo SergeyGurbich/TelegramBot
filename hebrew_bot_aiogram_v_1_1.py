@@ -2,6 +2,7 @@
 включающая текстовые, аудиозадания и задания-картинки, плюс добавлен английский язык,
 плюс включен логгинг - сохранение логов в отдельный файл'''
 
+import aiogram
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
