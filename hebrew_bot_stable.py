@@ -32,25 +32,20 @@ multilang = {'info_ru': 'Выберите уровень. Позже вы смо
               'info_uk':'Оберіть рівень. Пізніше ви зможете змінити свій вибір, набравши команду /level',
               'info_en':'Choose a level. Later on you can change it by typing /level',
               'eval_poz_ru': 'Таки да! Можете попробовать ещё другой вопрос, и тоже бесплатно.',
-              'eval_neg_ru': 'Не угадали. Попробуйте другую опцию выше, или закажите другой вопрос ниже.',
-              'eval_poz_uk': 'Саме так! Можете спробувати наступне питання, й теж безкоштовно!',
-              'eval_neg_uk': 'Не вгадали. Спробуйте іншу відповідь вище, або запросіть інше питання нижче',
+              'eval_neg_ru': 'Не угадали. Попробуйте еще раз с этим, или закажите другой вопрос получшее.',
+              'eval_poz_uk': 'Саме так! Можете спробувати наступне питання, й теж майже безкоштовно!',
+              'eval_neg_uk': 'Не вгадали. Спробуйте ще раз, або запросіть інше питання',
               'eval_poz_en':'Right! You can try another question, if you wish',
-              'eval_neg_en':'Not exactly. Try another answer above, or order one more question below',
-              'final_ru':'Одно удовольствие работать с Вами. Заходите еще! \nДля начала работы нажмите /start',
-              'final_uk':'Приємно було з вами працювати. Заходьте ще! \nДля початку роботи натисніть /start',
-              'final_en':'It was a pleasure working with you. Come back again! \nTo start a session press /start',
+              'eval_neg_en':'Not exactly. Try again with this question, or order another one',
+              'final_ru':'Правильно, а то от работы кони дохнут. Заходите еще!',
+              'final_uk':'Приємно було з вами працювати. Заходьте ще!',
+              'final_en':'It was a pleasure working with you. Come back again!',
               'more_ru':'Еще, пожалуйста', 'more_uk':'Ще, будь ласка', 'more_en':'One more, please',
               'enough_ru':'Пока хватит', 'enough_uk':'Поки доста', 'enough_en':'Enough for now',
               'type_ru':'Хотите вопрос в форме текста, аудио или картинки?',
               'type_uk':'Хочете запитання у формі тексту, аудіо чи зображення?',
-              'type_en':'Do you want the question in text, audio or picture form?',
-              'only_but_ru':'Извините, я общаюсь только через меню. Выберите опцию выше или нажмите /start',
-              'only_but_uk':'Вибачте, я спілкуюсь тільки через меню. Оберіть опцію вище або наберіть /start',
-              'only_but_en':'Excuse me, I can communicate only by menus. Please choose an option above or press /start',
-              'assess_ru':'Соотношение правильных ответов к общему числу ответов в этой сессии: ',
-              'assess_uk':'Співвідношення правильних відповідей к загальному числу відповідей в цьому сеансі: ',
-              'assess_en':'Ratio of correct answers to the total number of answers in this session: '}
+              'type_en':'Do you want the question in text, audio or picture form?'}
+
 # language keyboard
 btn1 = types.InlineKeyboardButton('Українська', callback_data='uk')
 btn2 = types.InlineKeyboardButton('English', callback_data='en')
@@ -104,35 +99,19 @@ async def get_quiz_answer(user: types.User):
     answer = data.get('answer')
     return answer
 
-# функция для сохранения количества right  / wrong ответов
-async def save_num_answers(user: types.User, number: int, mode=str):
-    data = await dp.storage.get_data(user=user)
-    data[mode] = number
-    await storage.set_data(user=user, data=data)
-
-# функция для получения количества right  / wrong ответов
-async def get_num_answers(user: types.User, mode=str):
-    data = await storage.get_data(user=user)
-    number = data.get(mode)
-    return number   
-
 # Функция для извлечения строки из базы по id
 async def get_row_by_id(table_name, id):
     conn = sqlite3.connect('hebrewbot.db')
     cursor = conn.cursor()
+    #query = "SELECT * FROM questions WHERE id = ?"
     cursor.execute("SELECT * FROM {} WHERE id={}".format(table_name, id))  
     row = cursor.fetchone()
     conn.close()
     return row
 
-@dp.message_handler(commands=['help'])
-async def process_start_command(message: types.Message):
-    txt='I can offer you the Hebrew quiz questions for levels A1 and A2 in the form of text, pictures or audio, and assess your answers.'
-    await bot.send_message(message.from_user.id, txt)
-
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
-    logging.info(f"User {message.from_user.username} started using the bot")
+    logging.info(f"Пользователь {message.from_user.username} запустил бот")
     await bot.send_message(message.from_user.id, "Оберіть мову / Choose your language /Выберите язык", reply_markup=lang_kb)
 
 @dp.message_handler(commands=['level'])
@@ -195,11 +174,11 @@ async def type_choice(callback_query: types.CallbackQuery):
     elif callback_query.data == 'audio':
         level = await get_user_level(callback_query.from_user.id)
         if level == 'A1':
-            num = random.randint(1, 12)
+            num = random.randint(1, 3)
         elif level == 'A2':
-            num = random.randint(1, 12)
+            num = random.randint(1, 3)
         else:
-            num = random.randint(1, 12)
+            num = random.randint(1, 3)
         table_name='audio_sent'
         row=await get_row_by_id(table_name, num)
         audio_file = InputFile(row[5])
@@ -220,11 +199,11 @@ async def type_choice(callback_query: types.CallbackQuery):
     elif callback_query.data == 'picture':
         level = await get_user_level(callback_query.from_user.id)
         if level == 'A1':
-            num = random.randint(1, 12)
+            num = random.randint(1, 6)
         elif level == 'A2':
-            num = random.randint(1, 12)
+            num = random.randint(1, 6)
         else:
-            num = random.randint(1, 12)
+            num = random.randint(1, 6)
         table_name='pictures'
         row=await get_row_by_id(table_name, num)
         image_file = InputFile(row[5])
@@ -251,48 +230,18 @@ async def loop(callback_query: types.CallbackQuery):
         txt=multilang[key]
         await bot.send_message(callback_query.from_user.id, txt, reply_markup=type_kb) # type_kb
     elif callback_query.data == 'no':
-        # Выставление финальной оценки, текст-прощание и обнуление счетчиков правильных и непр. ответов
-        num_right = await get_num_answers(callback_query.from_user.id, 'right')
-        if num_right == None:
-            num_right = 0
-        num_wrong = await get_num_answers(callback_query.from_user.id, 'wrong')
-        if num_wrong == None:
-            num_wrong = 0
-        
         key='final_'+lang
-        key2='assess_'+lang
-        txt1 = multilang[key] # текст-прощание
-        txt2 = multilang[key2]
-        txt3='{}/{}'.format(num_right, num_right+num_wrong)
-        txt=f'{txt2}{txt3}\n{txt1}'
+        txt = multilang[key]
         await bot.send_message(callback_query.from_user.id, txt)
-        await save_num_answers(callback_query.from_user.id, 0, 'right')
-        await save_num_answers(callback_query.from_user.id, 0, 'wrong')
 
 @dp.callback_query_handler(lambda callback_query: True)
 async def level_choice(callback_query: types.CallbackQuery):
     corr_answ = await get_quiz_answer(callback_query.from_user.id)
     lang = await get_user_language(callback_query.from_user.id)
     if callback_query.data == corr_answ:
-        # Увеличиваем на 1 количество правильных ответов
-        mode = 'right'
-        num = await get_num_answers(callback_query.from_user.id, mode)
-        if num == None:
-            num=0
-        num_new=num+1
-        await save_num_answers(callback_query.from_user.id, num_new, mode)
-
         key = 'eval_poz_'+lang
         txt=multilang[key]
     else:
-        # Увеличиваем на 1 количество неправильных ответов
-        mode = 'wrong'
-        num = await get_num_answers(callback_query.from_user.id, mode)
-        if num == None:
-            num=0
-        num_new=num+1
-        await save_num_answers(callback_query.from_user.id, num_new, mode)
-
         key = 'eval_neg_'+lang
         txt=multilang[key]
     await bot.send_message(callback_query.from_user.id, txt)
@@ -305,17 +254,12 @@ async def level_choice(callback_query: types.CallbackQuery):
     btn1 = types.InlineKeyboardButton(button1, callback_data='yes')
     btn2 = types.InlineKeyboardButton(button2, callback_data='no')
     finish_kb = types.InlineKeyboardMarkup().add(btn1, btn2)
-    txt1 = 'So?'
+    txt1 = 'Таки шо? / So what?'
     await bot.send_message(callback_query.from_user.id, txt1, reply_markup=finish_kb)
 
 @dp.message_handler()
 async def handle_all_messages(message: types.Message):
-    lang = await get_user_language(message.from_user.id)
-    if lang == None:
-        txt = 'Press /start'
-    else:
-        key = 'only_but_'+lang
-        txt=multilang[key]
+    txt = 'Press /start'
     await bot.send_message(message.from_user.id, txt)
 
 if __name__ == '__main__':
