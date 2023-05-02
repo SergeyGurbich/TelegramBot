@@ -220,11 +220,11 @@ async def type_choice(callback_query: types.CallbackQuery):
     elif callback_query.data == 'picture':
         level = await get_user_level(callback_query.from_user.id)
         if level == 'A1':
-            num = random.randint(1, 12)
+            num = random.randint(1, 10)
         elif level == 'A2':
-            num = random.randint(1, 12)
+            num = random.randint(11, 20)
         else:
-            num = random.randint(1, 12)
+            num = random.randint(1, 20)
         table_name='pictures'
         row=await get_row_by_id(table_name, num)
         image_file = InputFile(row[5])
@@ -319,4 +319,4 @@ async def handle_all_messages(message: types.Message):
     await bot.send_message(message.from_user.id, txt)
 
 if __name__ == '__main__':
-    executor.start_polling(dp)
+    executor.start_polling(dp, timeout=2)
